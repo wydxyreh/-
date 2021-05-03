@@ -6,8 +6,38 @@ CONFIG_SYSTEM_TRUSTED_KEYS="debian/canonical-certs.pem" to
 ->CONFIG_SYSTEM_TRUSTED_KEYS=""
 CONFIG_MODULE_SIG_KEY="certs/signing_key.pem"
 ->CONFIG_MODULE_SIG_KEY=""
+安装准备：
+sudo apt-get autoremove open-vm-tools
+sudo apt-get install open-vm-tools
+sudo apt-get install open-vm-tools-desktop
 
+sudo apt-get update;
+sudo apt-get install libncurses5-dev openssl libssl-dev
+sudo apt-get install build-essential openssl
+sudo apt-get install pkg-config
+sudo apt-get install libc6-dev
+sudo apt-get install bison
+sudo apt-get install flex
+sudo apt-get install libelf-dev
+sudo apt-get install zlibc minizip
+sudo apt-get install libidn11-dev libidn11
 
+指令：
+sudo tar -xavf linux-5.4.116.tar.xz  -C /usr/src
+cd /usr/src/linux-5.4.116
+sudo make mrproper
+sudo cp /boot/config-5.0.0-23-generic ./.config
+sudo make menuconfig
+load→OK→Save→OK→EXIT→EXIT
+sudo make clean
+sudo make bzImage -j16
+sudo make modules -j16
+sudo make modules_install
+sudo mkinitramfs /lib/modules/5.4.116 -o /boot/initrd.img-5.4.116-generic
+sudo cp /usr/src/linux-5.4.116/arch/x86/boot/bzImage /boot/vmlinuz-5.4.116-generic
+sudo cp /usr/src/linux-5.4.116/System.map /boot/System.map-5.4.116
+cd /boot/grub
+sudo update-grub2
 
 
 
