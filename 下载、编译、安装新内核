@@ -30,8 +30,8 @@ sudo cp /boot/config-5.0.0-23-generic ./.config
 sudo make menuconfig
 load→OK→Save→OK→EXIT→EXIT
 sudo make clean
-sudo make bzImage -j16
-sudo make modules -j16
+sudo make bzImage -j4
+sudo make modules -j4
 sudo make modules_install
 sudo mkinitramfs /lib/modules/5.4.116 -o /boot/initrd.img-5.4.116-generic
 sudo cp /usr/src/linux-5.4.116/arch/x86/boot/bzImage /boot/vmlinuz-5.4.116-generic
