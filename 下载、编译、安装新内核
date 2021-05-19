@@ -41,7 +41,100 @@ sudo update-grub2
 
 sudo unzip -d /usr/src openeuler-kernel-kernel-4.19.zip
 cd /usr/src/kernel
- sudo cp /mnt/hgfs/myshare/.config ./.config
+sudo cp /mnt/hgfs/myshare/.config ./.config
+1. 下载Openeuler内核
+2. /kernel/security创建文件夹demo
+	/kernel/security/demo/demo.c中
+	#include <linux/lsm_hooks.h>
+	#include <linux/sysctl.h>
+static unsigned long long count = 0;
+
+int demo_task_create(unsigned long clone_flags)
+{
+    printk("[+geek] call task_create(). count=%llu\n", ++count);    
+    return 0;
+}
+
+static struct security_hook_list demo_hooks[] = {
+    LSM_HOOK_INIT(task_create,demo_task_create),
+};
+void __init demo_add_hooks(void)
+{
+    pr_info("Demo: becoming mindful.\n");        //打印相关信息，可以通过dmesg |  grep Yama:查看
+    security_add_hooks(demo_hooks, ARRAY_SIZE(demo_hooks));   //添加安全模块函数
+}
+
+static __init int demo_init(void){
+    demo_add_hooks();
+    return 0;
+}
+
+security_initcall(demo_init);
+保存退出
+
+kernel/security/demo/Kconfig中
+config     SECURITY_DEMO
+   bool     "demo support"
+   depends on SECURITY
+   default     n
+   help
+        introduction of demo modules
+保存退出
+
+kernel/security/demo/Makefile中
+obj-$(CONFIG_SECURITY_GEEK) := demo.o
+demo-y := demo_lsm.o
+保存退出
+
+3.kernel/security/Kconfig中
+添加
+source security/demo/Kconfig
+到一堆source那一列
+
+添加default DEFAULT_SECURITY_DEMO if SECURITY_DEMO
+到一堆default DEFAULT_SECURITY那一列
+
+添加config DEFAULT_SECURITY_DEMO
+        bool "demo" if SECURITY_DEMO=y
+到一堆config DEFAULT_SECURITY
+        bool 
+那一列
+
+添加
+default "demo" if DEFAULT_SECURITY_DEMO
+到一堆default "demo" if DEFAULT_SECURITY 那一列
+
+4.kernel/security/Makefile中
+添加
+subdir-$(CONFIG_SECURITY_DEMO)        += demo
+到很多subdir-$(CONFIG_SECURITY...xxx
+那一列
+
+添加
+obj-$(CONFIG_SECURITY_DEMO)        += demo/
+到很多obj-$(CONFIG_SECURITY_xxx)        += xxx/
+那一列
+
+或者参照https://www.cnblogs.com/0xJDchen/p/6040446.html
+
+5.0 make menuconfig
+/security options/demo support打开
+/security options/default security module里面修改为demo
+
+5. make -j8 > /dev/null
+6. sudo make modules_install -j8 > /dev/null
+7. sudo make install -j8
+8. gedit /etc/default/grub
+GRUB_TIMEOUT_STYLE=hidden 这行删掉或者注释掉
+GRUB_TIMEOUT=5 这行代表开机在grub界面停留5秒
+9. sudo update-grub2
+能正确看到你的内核版本，在我这是
+“Found linux image: /boot/vmlinuz-4.19.177”
+10. 重启进入grub高级选项 选自己的新内核
+11. uname -r查看
+12. dmesg |  grep Yama
+显示Yama: becoming mindful.
+
 
 
 附：https://blog.csdn.net/qq_43688952/article/details/88856354
