@@ -41,7 +41,7 @@ sudo update-grub2
 
 sudo unzip -d /usr/src openeuler-kernel-kernel-4.19.zip
 cd /usr/src/kernel
-
+ sudo cp /mnt/hgfs/myshare/.config ./.config
 
 
 附：https://blog.csdn.net/qq_43688952/article/details/88856354
